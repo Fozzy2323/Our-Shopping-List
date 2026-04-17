@@ -1,0 +1,1951 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Our List 🛒❤️</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <meta name="theme-color" content="#7dd3fc" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+  <meta name="apple-mobile-web-app-title" content="Our List" />
+  <!-- Optional later:
+  <link rel="apple-touch-icon" href="apple-touch-icon.png" />
+  <link rel="manifest" href="manifest.json" />
+  -->
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --bg: #f7fbff;
+      --bg-soft: #eef8ff;
+      --card: rgba(255,255,255,0.92);
+      --card-strong: #ffffff;
+      --text: #17324a;
+      --muted: #6d8598;
+      --line: rgba(23,50,74,0.10);
+      --shadow: 0 14px 40px rgba(60, 120, 170, 0.12);
+      --shadow-soft: 0 8px 24px rgba(60, 120, 170, 0.10);
+      --accent: #4fc3f7;
+      --accent-2: #7cdbff;
+      --accent-3: #ffd6e7;
+      --accent-4: #c7f0db;
+      --danger: #ff7e95;
+      --success: #40c48f;
+      --warning: #ffb74d;
+      --chip: #edf7ff;
+      --trip-aldi: #d4f4ff;
+      --trip-coles: #ffe0e6;
+      --trip-woolworths: #dbf7e8;
+      --trip-market: #fff1d8;
+      --trip-chemist: #efe3ff;
+      --trip-bunnings: #ffe8e0;
+      --radius-xl: 24px;
+      --radius-lg: 18px;
+      --radius-md: 14px;
+      --radius-sm: 10px;
+      --max: 1100px;
+    }
+
+    * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+    html, body { margin: 0; padding: 0; background:
+      radial-gradient(circle at top left, rgba(124,219,255,0.35), transparent 32%),
+      radial-gradient(circle at top right, rgba(255,214,231,0.45), transparent 28%),
+      linear-gradient(180deg, #f9fdff 0%, #f3f9fd 100%);
+      color: var(--text);
+      font-family: Inter, ui-sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      min-height: 100%;
+    }
+
+    body {
+      padding: env(safe-area-inset-top) 0 env(safe-area-inset-bottom) 0;
+    }
+
+    .shell {
+      width: 100%;
+      max-width: var(--max);
+      margin: 0 auto;
+      padding: 18px 14px 28px;
+    }
+
+    .hero {
+      background: linear-gradient(135deg, rgba(79,195,247,0.96), rgba(124,219,255,0.96) 48%, rgba(255,214,231,0.96));
+      border-radius: 28px;
+      box-shadow: var(--shadow);
+      padding: 18px 18px 16px;
+      position: sticky;
+      top: 10px;
+      z-index: 20;
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255,255,255,0.55);
+    }
+
+    .hero-top {
+      display: flex;
+      gap: 14px;
+      justify-content: space-between;
+      align-items: start;
+      flex-wrap: wrap;
+    }
+
+    .title-wrap h1 {
+      margin: 0;
+      font-size: clamp(26px, 4vw, 38px);
+      line-height: 1;
+      letter-spacing: -0.03em;
+      color: white;
+      text-shadow: 0 1px 0 rgba(0,0,0,0.05);
+    }
+
+    .title-sub {
+      margin-top: 8px;
+      font-size: 14px;
+      color: rgba(255,255,255,0.9);
+      font-weight: 600;
+    }
+
+    .hero-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .ghost-btn, .pill-btn, .action-btn, .icon-btn {
+      border: 0;
+      outline: 0;
+      cursor: pointer;
+      transition: transform .12s ease, box-shadow .12s ease, opacity .12s ease;
+    }
+
+    .ghost-btn:active, .pill-btn:active, .action-btn:active, .icon-btn:active {
+      transform: scale(.98);
+    }
+
+    .ghost-btn {
+      padding: 11px 14px;
+      border-radius: 999px;
+      background: rgba(255,255,255,0.18);
+      color: white;
+      font-weight: 700;
+      backdrop-filter: blur(8px);
+      border: 1px solid rgba(255,255,255,0.28);
+    }
+
+    .pill-btn {
+      padding: 10px 14px;
+      border-radius: 999px;
+      background: var(--card-strong);
+      color: var(--text);
+      font-weight: 800;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .pill-btn.active {
+      background: linear-gradient(135deg, white, #fff7fb);
+      color: #134261;
+      box-shadow: 0 10px 24px rgba(40, 120, 170, 0.16);
+    }
+
+    .status-bar {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .status-now {
+      background: rgba(255,255,255,0.24);
+      color: white;
+      border: 1px solid rgba(255,255,255,0.22);
+      border-radius: 16px;
+      padding: 12px 14px;
+      min-height: 48px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-weight: 700;
+      overflow: hidden;
+    }
+
+    .status-now small {
+      display: block;
+      font-size: 12px;
+      opacity: .8;
+      font-weight: 600;
+    }
+
+    .status-ping {
+      display: flex;
+      gap: 10px;
+      min-width: 0;
+    }
+
+    .status-ping input {
+      min-width: 0;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.8);
+      box-shadow: var(--shadow-soft);
+      border-radius: var(--radius-xl);
+      backdrop-filter: blur(18px);
+    }
+
+    .section {
+      margin-top: 16px;
+      padding: 14px;
+    }
+
+    .section-title {
+      font-size: 14px;
+      font-weight: 900;
+      color: #44708b;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      margin-bottom: 12px;
+    }
+
+    .input-grid {
+      display: grid;
+      grid-template-columns: 2fr 1.1fr 1.1fr;
+      gap: 10px;
+    }
+
+    .input-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .input-grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .input-grid-3 {
+      display: grid;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 10px;
+    }
+
+    input, select, textarea {
+      width: 100%;
+      border: 1px solid rgba(23,50,74,0.10);
+      background: rgba(255,255,255,0.95);
+      color: var(--text);
+      border-radius: 16px;
+      padding: 14px 14px;
+      font-size: 16px;
+      outline: none;
+      box-shadow: inset 0 1px 0 rgba(255,255,255,0.5);
+    }
+
+    textarea {
+      min-height: 84px;
+      resize: vertical;
+    }
+
+    input:focus, select:focus, textarea:focus {
+      border-color: rgba(79,195,247,0.5);
+      box-shadow: 0 0 0 4px rgba(79,195,247,0.16);
+    }
+
+    .action-btn {
+      padding: 14px 18px;
+      border-radius: 16px;
+      font-weight: 900;
+      font-size: 15px;
+      color: white;
+      background: linear-gradient(135deg, var(--accent), #6ad6fb);
+      box-shadow: 0 12px 24px rgba(79,195,247,0.24);
+    }
+
+    .action-btn.secondary {
+      background: linear-gradient(135deg, #9ad9ff, #b8ebff);
+      color: #134261;
+    }
+
+    .action-btn.soft {
+      background: linear-gradient(135deg, #fff, #fef7fb);
+      color: #204158;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .action-btn.warn {
+      background: linear-gradient(135deg, #ffcf82, #ffb760);
+      color: #6b3b00;
+    }
+
+    .action-btn.danger {
+      background: linear-gradient(135deg, #ff9eb0, #ff7e95);
+      color: white;
+    }
+
+    .toolbar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 14px;
+    }
+
+    .toolbar-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      align-items: center;
+    }
+
+    .toggle {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(255,255,255,0.75);
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      padding: 10px 12px;
+      font-weight: 800;
+      color: #3f6278;
+      cursor: pointer;
+      user-select: none;
+    }
+
+    .toggle input {
+      width: auto;
+      margin: 0;
+      transform: scale(1.08);
+    }
+
+    .summary-strip {
+      margin-top: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+
+    .stat {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(250,252,255,0.92));
+      border-radius: 18px;
+      padding: 14px;
+      border: 1px solid rgba(23,50,74,0.08);
+      box-shadow: var(--shadow-soft);
+    }
+
+    .stat-label {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: .08em;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .stat-value {
+      margin-top: 6px;
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      color: #10314a;
+    }
+
+    .trip-board {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    .trip-col {
+      border-radius: 22px;
+      padding: 12px;
+      border: 1px solid rgba(23,50,74,0.08);
+      min-height: 140px;
+      box-shadow: var(--shadow-soft);
+    }
+
+    .trip-col h3 {
+      margin: 0 0 8px;
+      font-size: 16px;
+      line-height: 1.1;
+    }
+
+    .trip-col.aldi { background: linear-gradient(180deg, var(--trip-aldi), #f8fdff); }
+    .trip-col.coles { background: linear-gradient(180deg, var(--trip-coles), #fffafb); }
+    .trip-col.woolworths { background: linear-gradient(180deg, var(--trip-woolworths), #fbfffd); }
+    .trip-col.preston-market { background: linear-gradient(180deg, var(--trip-market), #fffdf9); }
+    .trip-col.chemist-warehouse { background: linear-gradient(180deg, var(--trip-chemist), #fcf9ff); }
+    .trip-col.bunnings { background: linear-gradient(180deg, var(--trip-bunnings), #fffaf8); }
+    .trip-col.other-store { background: linear-gradient(180deg, #edf4ff, #fbfdff); }
+    .trip-col.unassigned { background: linear-gradient(180deg, #f3f7fb, #fcfdff); }
+
+    .trip-mini-item {
+      margin-top: 8px;
+      padding: 10px 12px;
+      border-radius: 14px;
+      background: rgba(255,255,255,0.8);
+      border: 1px solid rgba(23,50,74,0.06);
+      font-weight: 700;
+      display: flex;
+      justify-content: space-between;
+      gap: 10px;
+    }
+
+    .list-zone {
+      margin-top: 14px;
+    }
+
+    .group-block {
+      margin-top: 16px;
+    }
+
+    .group-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 8px;
+      padding: 0 2px;
+    }
+
+    .group-title {
+      font-size: 20px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .group-count {
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 800;
+      background: rgba(255,255,255,0.75);
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+    }
+
+    .item-card {
+      position: relative;
+      display: grid;
+      grid-template-columns: auto 1fr auto;
+      gap: 12px;
+      align-items: start;
+      padding: 14px;
+      border-radius: 22px;
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(251,253,255,0.93));
+      border: 1px solid rgba(23,50,74,0.08);
+      box-shadow: var(--shadow-soft);
+      margin-bottom: 10px;
+    }
+
+    .item-card.completed {
+      opacity: 0.62;
+    }
+
+    .item-check {
+      width: 28px;
+      height: 28px;
+      border-radius: 999px;
+      border: 2px solid rgba(79,195,247,0.55);
+      background: white;
+      cursor: pointer;
+      margin-top: 4px;
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .item-check.done {
+      background: linear-gradient(135deg, #72dcb0, #47c492);
+      border-color: #47c492;
+    }
+
+    .item-check.done::after {
+      content: "✓";
+      color: white;
+      position: absolute;
+      left: 6px;
+      top: 1px;
+      font-size: 16px;
+      font-weight: 900;
+    }
+
+    .item-main {
+      min-width: 0;
+    }
+
+    .item-name {
+      font-size: 18px;
+      font-weight: 900;
+      letter-spacing: -0.02em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      align-items: center;
+    }
+
+    .item-name.completed-text {
+      text-decoration: line-through;
+    }
+
+    .item-meta, .item-submeta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 8px;
+    }
+
+    .chip {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      background: var(--chip);
+      border: 1px solid rgba(23,50,74,0.06);
+      padding: 7px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      font-weight: 900;
+      color: #43637a;
+      line-height: 1;
+    }
+
+    .chip.price {
+      background: #fdf3dc;
+      color: #885200;
+    }
+
+    .chip.trip {
+      background: #e8f7ee;
+      color: #237348;
+    }
+
+    .chip.note {
+      background: #f6efff;
+      color: #5f3d8f;
+    }
+
+    .item-note {
+      margin-top: 8px;
+      color: #557286;
+      font-size: 14px;
+      font-weight: 600;
+      line-height: 1.35;
+    }
+
+    .item-actions {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      align-items: end;
+    }
+
+    .icon-btn {
+      width: 40px;
+      height: 40px;
+      border-radius: 14px;
+      background: white;
+      border: 1px solid rgba(23,50,74,0.08);
+      box-shadow: var(--shadow-soft);
+      font-size: 18px;
+      display: inline-flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .photo-thumb {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      object-fit: cover;
+      border: 1px solid rgba(23,50,74,0.08);
+      box-shadow: var(--shadow-soft);
+      cursor: pointer;
+      display: block;
+    }
+
+    .empty {
+      padding: 30px 16px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .muted {
+      color: var(--muted);
+    }
+
+    .hidden { display: none !important; }
+
+    .modal-wrap {
+      position: fixed;
+      inset: 0;
+      z-index: 60;
+      display: none;
+      justify-content: center;
+      align-items: end;
+      background: rgba(10,22,36,0.36);
+      backdrop-filter: blur(10px);
+      padding: 14px;
+    }
+
+    .modal-wrap.open {
+      display: flex;
+    }
+
+    .modal {
+      width: 100%;
+      max-width: 720px;
+      max-height: 92vh;
+      overflow: auto;
+      background: rgba(255,255,255,0.96);
+      border-radius: 28px;
+      box-shadow: 0 24px 60px rgba(20,40,60,0.24);
+      border: 1px solid rgba(255,255,255,0.9);
+      padding: 16px;
+    }
+
+    .modal-head {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    .modal-title {
+      font-size: 24px;
+      font-weight: 900;
+      letter-spacing: -0.03em;
+    }
+
+    .photo-large {
+      width: 100%;
+      max-height: 70vh;
+      object-fit: contain;
+      border-radius: 18px;
+      background: #f6f9fc;
+      border: 1px solid rgba(23,50,74,0.08);
+    }
+
+    .manager-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+    }
+
+    .manager-card {
+      background: linear-gradient(180deg, rgba(255,255,255,0.95), rgba(248,252,255,0.94));
+      border: 1px solid rgba(23,50,74,0.08);
+      border-radius: 20px;
+      box-shadow: var(--shadow-soft);
+      padding: 14px;
+    }
+
+    .manager-card h4 {
+      margin: 0 0 10px;
+      font-size: 16px;
+    }
+
+    .hint {
+      font-size: 13px;
+      color: var(--muted);
+      font-weight: 700;
+      margin-top: 6px;
+    }
+
+    .toast-wrap {
+      position: fixed;
+      left: 50%;
+      bottom: 18px;
+      transform: translateX(-50%);
+      z-index: 99;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      width: min(92vw, 520px);
+    }
+
+    .toast {
+      background: rgba(22,48,69,0.94);
+      color: white;
+      padding: 14px 16px;
+      border-radius: 18px;
+      box-shadow: 0 20px 38px rgba(0,0,0,0.18);
+      font-weight: 800;
+    }
+
+    .tiny {
+      font-size: 12px;
+    }
+
+    @media (max-width: 880px) {
+      .input-grid,
+      .input-grid-2,
+      .input-grid-3,
+      .manager-grid,
+      .trip-board,
+      .summary-strip {
+        grid-template-columns: 1fr;
+      }
+
+      .status-bar {
+        grid-template-columns: 1fr;
+      }
+
+      .hero {
+        position: static;
+      }
+
+      .item-card {
+        grid-template-columns: auto 1fr;
+      }
+
+      .item-actions {
+        grid-column: 1 / -1;
+        flex-direction: row;
+        justify-content: flex-end;
+        align-items: center;
+        flex-wrap: wrap;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <div class="hero">
+      <div class="hero-top">
+        <div class="title-wrap">
+          <h1 id="appTitle">Our List 🛒❤️</h1>
+          <div class="title-sub" id="appSubtitle">Shared, live, beautiful, and fast.</div>
+        </div>
+
+        <div class="hero-actions">
+          <button class="ghost-btn" id="openManagersBtn">Manage</button>
+          <button class="ghost-btn" id="enableBrowserNotifBtn">Alerts</button>
+          <button class="ghost-btn" id="clearCompletedBtn">Clear Completed</button>
+        </div>
+      </div>
+
+      <div class="status-bar">
+        <div class="status-now" id="statusNow">
+          <div>
+            <small>Live household ping</small>
+            <div id="statusNowText">No updates yet.</div>
+          </div>
+        </div>
+
+        <div class="status-ping">
+          <input id="statusSenderInput" placeholder="Name e.g. Adam" />
+          <input id="statusInput" placeholder="Quick ping... 'Done adding' or 'Need Coles after Aldi'" />
+          <button class="pill-btn" id="sendStatusBtn">Send</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="section-title">Add item</div>
+
+      <div class="input-grid">
+        <input id="itemNameInput" placeholder="Add item..." />
+        <select id="categorySelect"></select>
+        <select id="storeSelect"></select>
+      </div>
+
+      <div class="input-row">
+        <input id="storeOtherInput" class="hidden" placeholder="Other store name..." />
+      </div>
+
+      <div class="input-grid-3">
+        <input id="quantityInput" type="number" step="0.01" placeholder="Qty (optional)" />
+        <input id="unitInput" placeholder="Unit e.g. kg, pack, bottle" />
+        <input id="priceInput" type="number" step="0.01" placeholder="Price (optional)" />
+      </div>
+
+      <div class="input-grid-2">
+        <select id="fallbackStoreSelect"></select>
+        <input id="notesInput" placeholder="Notes e.g. exact brand / size / style..." />
+      </div>
+
+      <div class="input-grid-2">
+        <label class="card" style="padding:12px 14px; display:block;">
+          <div style="font-weight:900; margin-bottom:8px;">Item photo (optional)</div>
+          <input id="photoInput" type="file" accept="image/*" capture="environment" />
+          <div class="hint">Snap the exact product if it matters.</div>
+        </label>
+
+        <div class="card" style="padding:12px 14px;">
+          <div style="font-weight:900; margin-bottom:8px;">Quick presets</div>
+          <div class="toolbar-group">
+            <button class="pill-btn" data-preset="Done adding">Done adding</button>
+            <button class="pill-btn" data-preset="Wait one more thing">Wait one more thing</button>
+            <button class="pill-btn" data-preset="At Aldi now">At Aldi now</button>
+            <button class="pill-btn" data-preset="Need Coles after this">Need Coles after this</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="action-btn" id="addItemBtn">Add Item</button>
+          <button class="action-btn secondary" id="resetFormBtn">Reset</button>
+        </div>
+
+        <div class="toolbar-group">
+          <label class="toggle">
+            <input type="checkbox" id="showCompletedToggle" />
+            Show completed
+          </label>
+
+          <label class="toggle">
+            <input type="checkbox" id="tripModeToggle" />
+            Trip mode
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <div class="summary-strip">
+      <div class="stat">
+        <div class="stat-label">Pending</div>
+        <div class="stat-value" id="pendingCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Completed</div>
+        <div class="stat-value" id="completedCount">0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Estimated total</div>
+        <div class="stat-value" id="estimatedTotal">$0</div>
+      </div>
+      <div class="stat">
+        <div class="stat-label">Stores today</div>
+        <div class="stat-value" id="storeCount">0</div>
+      </div>
+    </div>
+
+    <div class="card section">
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="pill-btn active" id="viewGroupedBtn">Grouped</button>
+          <button class="pill-btn" id="viewFlatBtn">Flat</button>
+          <button class="pill-btn" id="viewTripBtn">Trip</button>
+        </div>
+
+        <div class="toolbar-group">
+          <select id="tripStoreFilter">
+            <option value="">All stores</option>
+          </select>
+          <input id="searchInput" placeholder="Search list..." />
+        </div>
+      </div>
+
+      <div class="list-zone" id="listZone"></div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="photoModalWrap">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Item photo</div>
+        <button class="icon-btn" id="closePhotoModalBtn">✕</button>
+      </div>
+      <img id="photoModalImg" class="photo-large" alt="Item photo" />
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="editModalWrap">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Edit item</div>
+        <button class="icon-btn" id="closeEditModalBtn">✕</button>
+      </div>
+
+      <input type="hidden" id="editItemId" />
+
+      <div class="input-grid">
+        <input id="editNameInput" placeholder="Item name" />
+        <select id="editCategorySelect"></select>
+        <select id="editStoreSelect"></select>
+      </div>
+
+      <div class="input-row">
+        <input id="editStoreOtherInput" class="hidden" placeholder="Other store name..." />
+      </div>
+
+      <div class="input-grid-3">
+        <input id="editQuantityInput" type="number" step="0.01" placeholder="Qty" />
+        <input id="editUnitInput" placeholder="Unit" />
+        <input id="editPriceInput" type="number" step="0.01" placeholder="Price" />
+      </div>
+
+      <div class="input-grid-2">
+        <select id="editFallbackStoreSelect"></select>
+        <input id="editNotesInput" placeholder="Notes" />
+      </div>
+
+      <div class="input-grid-2">
+        <label class="card" style="padding:12px 14px; display:block;">
+          <div style="font-weight:900; margin-bottom:8px;">Replace item photo</div>
+          <input id="editPhotoInput" type="file" accept="image/*" capture="environment" />
+        </label>
+
+        <div class="card" style="padding:12px 14px;">
+          <div style="font-weight:900; margin-bottom:8px;">Trip status</div>
+          <select id="editTripStatusSelect">
+            <option value="pending">Pending</option>
+            <option value="purchased">Purchased</option>
+            <option value="deferred">Deferred</option>
+            <option value="unavailable">Unavailable</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="toolbar">
+        <div class="toolbar-group">
+          <button class="action-btn" id="saveEditBtn">Save changes</button>
+          <button class="action-btn soft" id="archiveItemBtn">Archive</button>
+        </div>
+        <div class="toolbar-group">
+          <button class="action-btn danger" id="deleteItemBtn">Delete</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-wrap" id="managersModalWrap">
+    <div class="modal">
+      <div class="modal-head">
+        <div class="modal-title">Manage app</div>
+        <button class="icon-btn" id="closeManagersModalBtn">✕</button>
+      </div>
+
+      <div class="manager-grid">
+        <div class="manager-card">
+          <h4>App settings</h4>
+          <div class="input-row">
+            <input id="appNameInput" placeholder="App name" />
+            <button class="action-btn" id="saveAppNameBtn">Save app name</button>
+          </div>
+        </div>
+
+        <div class="manager-card">
+          <h4>Add category</h4>
+          <div class="input-row">
+            <input id="newCategoryInput" placeholder="New category name" />
+            <button class="action-btn" id="addCategoryBtn">Add category</button>
+          </div>
+        </div>
+
+        <div class="manager-card">
+          <h4>Add store</h4>
+          <div class="input-row">
+            <input id="newStoreInput" placeholder="New store name" />
+            <button class="action-btn" id="addStoreBtn">Add store</button>
+          </div>
+        </div>
+
+        <div class="manager-card">
+          <h4>Push notifications</h4>
+          <div class="input-row">
+            <div class="muted" style="font-weight:700;">
+              Browser alert permission can be enabled now. True cross-device push send is prepared for V2.
+            </div>
+            <button class="action-btn secondary" id="modalEnableBrowserNotifBtn">Enable browser alerts</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="manager-grid" style="margin-top:10px;">
+        <div class="manager-card">
+          <h4>Categories</h4>
+          <div id="categoriesManager"></div>
+        </div>
+
+        <div class="manager-card">
+          <h4>Stores</h4>
+          <div id="storesManager"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast-wrap" id="toastWrap"></div>
+
+  <script>
+    const SUPABASE_URL = "https://euxkqxgtgigbjqgowlej.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eGtxeGd0Z2lnYmpxZ293bGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjY2MTYsImV4cCI6MjA5MjA0MjYxNn0.z4WfmJh9hXaahBNHpy8BFBA6plnnNOfFumF72hC9tt8";
+    const BUCKET_NAME = "item-photos";
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    let appSettings = null;
+    let categories = [];
+    let stores = [];
+    let items = [];
+    let lastStatus = null;
+    let currentView = "grouped";
+    let isTripMode = false;
+
+    const $ = (id) => document.getElementById(id);
+
+    function toast(message) {
+      const wrap = $("toastWrap");
+      const el = document.createElement("div");
+      el.className = "toast";
+      el.textContent = message;
+      wrap.appendChild(el);
+      setTimeout(() => {
+        el.style.opacity = "0";
+        el.style.transform = "translateY(8px)";
+      }, 2200);
+      setTimeout(() => el.remove(), 2700);
+    }
+
+    function currency(v) {
+      const num = Number(v || 0);
+      return new Intl.NumberFormat("en-AU", { style: "currency", currency: "AUD", maximumFractionDigits: 2 }).format(num);
+    }
+
+    function escapeHtml(str = "") {
+      return String(str)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#039;");
+    }
+
+    function slugify(str = "") {
+      return String(str).toLowerCase().trim().replace(/[^a-z0-9]+/g, "-").replace(/(^-|-$)/g, "");
+    }
+
+    function storeVisualClass(name = "") {
+      const s = slugify(name);
+      if (!s) return "unassigned";
+      if (s.includes("aldi")) return "aldi";
+      if (s.includes("coles")) return "coles";
+      if (s.includes("woolworths")) return "woolworths";
+      if (s.includes("preston-market")) return "preston-market";
+      if (s.includes("chemist-warehouse")) return "chemist-warehouse";
+      if (s.includes("bunnings")) return "bunnings";
+      return "other-store";
+    }
+
+    function storeNameFromItem(item) {
+      if (item.store_other && item.store_other.trim()) return item.store_other.trim();
+      const store = stores.find(s => s.id === item.store_id);
+      return store?.name || "";
+    }
+
+    function fallbackStoreName(item) {
+      const store = stores.find(s => s.id === item.fallback_store_id);
+      return store?.name || "";
+    }
+
+    function categoryNameFromItem(item) {
+      const cat = categories.find(c => c.id === item.category_id);
+      return cat?.name || "Other";
+    }
+
+    function quantityLabel(item) {
+      const q = item.quantity;
+      const u = (item.unit || "").trim();
+      if (q === null || q === undefined || q === "") return "";
+      return `${q}${u ? " " + u : ""}`;
+    }
+
+    function itemMatchesSearch(item, search) {
+      if (!search) return true;
+      const haystack = [
+        item.name,
+        item.notes,
+        storeNameFromItem(item),
+        fallbackStoreName(item),
+        categoryNameFromItem(item)
+      ].join(" ").toLowerCase();
+      return haystack.includes(search.toLowerCase());
+    }
+
+    function applyFilters(rawItems) {
+      const search = $("searchInput").value.trim();
+      const filterStoreId = $("tripStoreFilter").value;
+      const showCompleted = $("showCompletedToggle").checked;
+
+      return rawItems
+        .filter(item => !item.archived)
+        .filter(item => showCompleted ? true : !item.completed)
+        .filter(item => itemMatchesSearch(item, search))
+        .filter(item => filterStoreId ? item.store_id === filterStoreId : true)
+        .sort((a,b) => new Date(a.created_at) - new Date(b.created_at));
+    }
+
+    function updateSummary() {
+      const activeItems = items.filter(i => !i.archived);
+      const pending = activeItems.filter(i => !i.completed).length;
+      const completed = activeItems.filter(i => i.completed).length;
+      const total = activeItems
+        .filter(i => !i.completed)
+        .reduce((sum, i) => sum + Number(i.last_price || 0), 0);
+
+      const storeSet = new Set(
+        activeItems
+          .filter(i => !i.completed)
+          .map(i => storeNameFromItem(i))
+          .filter(Boolean)
+      );
+
+      $("pendingCount").textContent = pending;
+      $("completedCount").textContent = completed;
+      $("estimatedTotal").textContent = currency(total);
+      $("storeCount").textContent = storeSet.size;
+    }
+
+    function renderStatus() {
+      if (!lastStatus) {
+        $("statusNowText").textContent = "No updates yet.";
+        return;
+      }
+      const sender = lastStatus.sender_name?.trim() ? `${lastStatus.sender_name}: ` : "";
+      $("statusNowText").textContent = `${sender}${lastStatus.message}`;
+    }
+
+    function renderSelectOptions() {
+      const categorySelects = [$("categorySelect"), $("editCategorySelect")];
+      const storeSelects = [$("storeSelect"), $("editStoreSelect"), $("fallbackStoreSelect"), $("editFallbackStoreSelect"), $("tripStoreFilter")];
+
+      categorySelects.forEach(sel => {
+        if (!sel) return;
+        const current = sel.value;
+        sel.innerHTML = categories
+          .filter(c => c.active)
+          .sort((a,b) => (a.sort_order ?? 999) - (b.sort_order ?? 999) || a.name.localeCompare(b.name))
+          .map(c => `<option value="${c.id}">${escapeHtml(c.icon || "•")} ${escapeHtml(c.name)}</option>`)
+          .join("");
+        if (current) sel.value = current;
+      });
+
+      storeSelects.forEach(sel => {
+        if (!sel) return;
+        const current = sel.value;
+        const allOption = sel.id === "tripStoreFilter" ? `<option value="">All stores</option>` : `<option value="">No store</option>`;
+        sel.innerHTML = allOption + stores
+          .filter(s => s.active)
+          .sort((a,b) => (a.sort_order ?? 999) - (b.sort_order ?? 999) || a.name.localeCompare(b.name))
+          .map(s => `<option value="${s.id}">${escapeHtml(s.name)}</option>`)
+          .join("");
+        if (current) sel.value = current;
+      });
+    }
+
+    function itemCardHtml(item) {
+      const storeName = storeNameFromItem(item);
+      const fallbackName = fallbackStoreName(item);
+      const catName = categoryNameFromItem(item);
+      const qty = quantityLabel(item);
+
+      return `
+        <div class="item-card ${item.completed ? "completed" : ""}">
+          <button class="item-check ${item.completed ? "done" : ""}" onclick="toggleCompleted('${item.id}', ${item.completed})" aria-label="Toggle completed"></button>
+
+          <div class="item-main">
+            <div class="item-name ${item.completed ? "completed-text" : ""}">
+              ${escapeHtml(item.name)}
+            </div>
+
+            <div class="item-meta">
+              <span class="chip">${escapeHtml(catName)}</span>
+              ${storeName ? `<span class="chip">🛒 ${escapeHtml(storeName)}</span>` : `<span class="chip">🛒 Unassigned</span>`}
+              ${qty ? `<span class="chip">${escapeHtml(qty)}</span>` : ""}
+              ${item.last_price ? `<span class="chip price">💲 ${currency(item.last_price)}</span>` : ""}
+            </div>
+
+            <div class="item-submeta">
+              ${fallbackName ? `<span class="chip trip">↪ Backup: ${escapeHtml(fallbackName)}</span>` : ""}
+              ${item.trip_status && item.trip_status !== "pending" ? `<span class="chip trip">Trip: ${escapeHtml(item.trip_status)}</span>` : ""}
+              ${item.image_url ? `<span class="chip note">📸 Photo attached</span>` : ""}
+            </div>
+
+            ${item.notes ? `<div class="item-note">${escapeHtml(item.notes)}</div>` : ""}
+          </div>
+
+          <div class="item-actions">
+            ${item.image_url ? `<img src="${escapeHtml(item.image_url)}" class="photo-thumb" alt="Item photo" onclick="openPhoto('${escapeHtml(item.image_url)}')" />` : ""}
+            <button class="icon-btn" onclick="openEditModal('${item.id}')" title="Edit">✏️</button>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderGroupedList(filtered) {
+      const listZone = $("listZone");
+      if (!filtered.length) {
+        listZone.innerHTML = `<div class="empty">Nothing showing right now. Add something tasty.</div>`;
+        return;
+      }
+
+      const groups = {};
+      filtered.forEach(item => {
+        const catName = categoryNameFromItem(item);
+        if (!groups[catName]) groups[catName] = [];
+        groups[catName].push(item);
+      });
+
+      const html = Object.entries(groups)
+        .sort((a,b) => a[0].localeCompare(b[0]))
+        .map(([groupName, groupItems]) => `
+          <div class="group-block">
+            <div class="group-header">
+              <div class="group-title">${escapeHtml(groupName)}</div>
+              <div class="group-count">${groupItems.length} item${groupItems.length === 1 ? "" : "s"}</div>
+            </div>
+            ${groupItems.map(itemCardHtml).join("")}
+          </div>
+        `)
+        .join("");
+
+      listZone.innerHTML = html;
+    }
+
+    function renderFlatList(filtered) {
+      const listZone = $("listZone");
+      if (!filtered.length) {
+        listZone.innerHTML = `<div class="empty">Nothing showing right now. Add something tasty.</div>`;
+        return;
+      }
+      listZone.innerHTML = filtered.map(itemCardHtml).join("");
+    }
+
+    function renderTripList(filtered) {
+      const listZone = $("listZone");
+
+      const map = {};
+      filtered.filter(i => !i.completed).forEach(item => {
+        const key = storeNameFromItem(item) || "Unassigned";
+        if (!map[key]) map[key] = [];
+        map[key].push(item);
+      });
+
+      const orderedKeys = Object.keys(map).sort((a,b) => {
+        if (a === "Unassigned") return 1;
+        if (b === "Unassigned") return -1;
+        return a.localeCompare(b);
+      });
+
+      if (!orderedKeys.length) {
+        listZone.innerHTML = `<div class="empty">Trip board is clear. Nice work.</div>`;
+        return;
+      }
+
+      const html = `
+        <div class="trip-board">
+          ${orderedKeys.map(key => `
+            <div class="trip-col ${key === "Unassigned" ? "unassigned" : storeVisualClass(key)}">
+              <h3>${escapeHtml(key)}</h3>
+              ${map[key].map(item => `
+                <div class="trip-mini-item">
+                  <span>${escapeHtml(item.name)}</span>
+                  <span class="tiny muted">${item.last_price ? currency(item.last_price) : ""}</span>
+                </div>
+              `).join("")}
+            </div>
+          `).join("")}
+        </div>
+
+        <div class="group-block">
+          <div class="group-header">
+            <div class="group-title">Full trip list</div>
+            <div class="group-count">${filtered.filter(i => !i.completed).length} pending</div>
+          </div>
+          ${filtered.map(itemCardHtml).join("")}
+        </div>
+      `;
+
+      listZone.innerHTML = html;
+    }
+
+    function renderList() {
+      const filtered = applyFilters(items);
+      updateSummary();
+
+      if (currentView === "grouped") renderGroupedList(filtered);
+      else if (currentView === "flat") renderFlatList(filtered);
+      else renderTripList(filtered);
+    }
+
+    function setView(view) {
+      currentView = view;
+      $("viewGroupedBtn").classList.toggle("active", view === "grouped");
+      $("viewFlatBtn").classList.toggle("active", view === "flat");
+      $("viewTripBtn").classList.toggle("active", view === "trip");
+      renderList();
+    }
+
+    async function loadSettings() {
+      const { data, error } = await supabase.from("app_settings").select("*").limit(1).single();
+      if (error && error.code !== "PGRST116") {
+        console.error(error);
+        toast("Could not load app settings.");
+        return;
+      }
+      appSettings = data || null;
+      $("appTitle").textContent = appSettings?.app_name || "Our List 🛒❤️";
+      $("appNameInput").value = appSettings?.app_name || "Our List 🛒❤️";
+      $("showCompletedToggle").checked = !!appSettings?.show_completed;
+      setView(appSettings?.default_view || "grouped");
+    }
+
+    async function loadCategories() {
+      const { data, error } = await supabase.from("categories").select("*").order("sort_order", { ascending: true });
+      if (error) {
+        console.error(error);
+        toast("Could not load categories.");
+        return;
+      }
+      categories = data || [];
+      renderSelectOptions();
+      renderManagers();
+    }
+
+    async function loadStores() {
+      const { data, error } = await supabase.from("stores").select("*").order("sort_order", { ascending: true });
+      if (error) {
+        console.error(error);
+        toast("Could not load stores.");
+        return;
+      }
+      stores = data || [];
+      renderSelectOptions();
+      renderManagers();
+    }
+
+    async function loadItems() {
+      const { data, error } = await supabase.from("items").select("*").order("created_at", { ascending: true });
+      if (error) {
+        console.error(error);
+        toast("Could not load items.");
+        return;
+      }
+      items = data || [];
+      renderList();
+    }
+
+    async function loadLatestStatus() {
+      const { data, error } = await supabase
+        .from("status_messages")
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+
+      if (error) {
+        console.error(error);
+        return;
+      }
+      lastStatus = data || null;
+      renderStatus();
+    }
+
+    async function uploadPhoto(file) {
+      if (!file) return { image_path: null, image_url: null };
+      const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
+      const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
+
+      const { error: uploadError } = await supabase.storage.from(BUCKET_NAME).upload(path, file, {
+        cacheControl: "3600",
+        upsert: false
+      });
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage.from(BUCKET_NAME).getPublicUrl(path);
+      return {
+        image_path: path,
+        image_url: data.publicUrl
+      };
+    }
+
+    async function addItem() {
+      const name = $("itemNameInput").value.trim();
+      if (!name) {
+        toast("Add an item name first.");
+        return;
+      }
+
+      const category_id = $("categorySelect").value || null;
+      const store_id = $("storeSelect").value || null;
+      const quantity = $("quantityInput").value ? Number($("quantityInput").value) : null;
+      const unit = $("unitInput").value.trim() || null;
+      const notes = $("notesInput").value.trim() || null;
+      const last_price = $("priceInput").value ? Number($("priceInput").value) : null;
+      const fallback_store_id = $("fallbackStoreSelect").value || null;
+      let store_other = null;
+
+      const selectedStore = stores.find(s => s.id === store_id);
+      if (selectedStore?.name === "Other") {
+        store_other = $("storeOtherInput").value.trim() || null;
+      }
+
+      let uploaded = { image_path: null, image_url: null };
+      const photoFile = $("photoInput").files?.[0];
+      if (photoFile) {
+        try {
+          toast("Uploading photo...");
+          uploaded = await uploadPhoto(photoFile);
+        } catch (err) {
+          console.error(err);
+          toast("Photo upload failed.");
+          return;
+        }
+      }
+
+      const payload = {
+        name,
+        notes,
+        category_id,
+        store_id,
+        store_other,
+        quantity,
+        unit,
+        last_price,
+        fallback_store_id,
+        price_store_id: store_id,
+        price_updated_at: last_price ? new Date().toISOString() : null,
+        image_path: uploaded.image_path,
+        image_url: uploaded.image_url
+      };
+
+      const { data, error } = await supabase.from("items").insert(payload).select().single();
+      if (error) {
+        console.error(error);
+        toast("Could not add item.");
+        return;
+      }
+
+      if (last_price && data?.id) {
+        await supabase.from("price_history").insert({
+          item_id: data.id,
+          store_id: store_id,
+          price: last_price,
+          note: "Manual V1 entry"
+        });
+      }
+
+      resetForm();
+      toast("Item added.");
+    }
+
+    function resetForm() {
+      $("itemNameInput").value = "";
+      $("quantityInput").value = "";
+      $("unitInput").value = "";
+      $("notesInput").value = "";
+      $("priceInput").value = "";
+      $("photoInput").value = "";
+      $("storeOtherInput").value = "";
+      $("storeOtherInput").classList.add("hidden");
+      $("fallbackStoreSelect").value = "";
+      if (categories[0]) $("categorySelect").value = categories[0].id;
+      $("storeSelect").value = "";
+    }
+
+    async function toggleCompleted(id, currentState) {
+      const next = !currentState;
+      const item = items.find(i => i.id === id);
+
+      const updatePayload = {
+        completed: next,
+        trip_status: next ? "purchased" : "pending"
+      };
+
+      const { error } = await supabase.from("items").update(updatePayload).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not update item.");
+        return;
+      }
+
+      if (next && "Notification" in window && Notification.permission === "granted") {
+        try {
+          new Notification("List update", {
+            body: `${item?.name || "An item"} was marked complete`
+          });
+        } catch (e) {}
+      }
+    }
+
+    async function clearCompleted() {
+      const completedItems = items.filter(i => i.completed && !i.archived);
+      if (!completedItems.length) {
+        toast("No completed items to clear.");
+        return;
+      }
+
+      const ids = completedItems.map(i => i.id);
+      const { error } = await supabase.from("items").update({ archived: true }).in("id", ids);
+      if (error) {
+        console.error(error);
+        toast("Could not clear completed.");
+        return;
+      }
+
+      toast("Completed items cleared to history.");
+    }
+
+    async function sendStatus() {
+      const message = $("statusInput").value.trim();
+      const sender_name = $("statusSenderInput").value.trim() || null;
+
+      if (!message) {
+        toast("Type a quick ping first.");
+        return;
+      }
+
+      const { error } = await supabase.from("status_messages").insert({ message, sender_name });
+      if (error) {
+        console.error(error);
+        toast("Could not send status.");
+        return;
+      }
+
+      $("statusInput").value = "";
+      toast("Ping sent.");
+    }
+
+    async function openEditModal(id) {
+      const item = items.find(i => i.id === id);
+      if (!item) return;
+
+      $("editItemId").value = item.id;
+      $("editNameInput").value = item.name || "";
+      $("editCategorySelect").value = item.category_id || "";
+      $("editStoreSelect").value = item.store_id || "";
+      $("editQuantityInput").value = item.quantity ?? "";
+      $("editUnitInput").value = item.unit || "";
+      $("editPriceInput").value = item.last_price ?? "";
+      $("editFallbackStoreSelect").value = item.fallback_store_id || "";
+      $("editNotesInput").value = item.notes || "";
+      $("editTripStatusSelect").value = item.trip_status || "pending";
+
+      const selectedStore = stores.find(s => s.id === item.store_id);
+      if (selectedStore?.name === "Other") {
+        $("editStoreOtherInput").classList.remove("hidden");
+        $("editStoreOtherInput").value = item.store_other || "";
+      } else {
+        $("editStoreOtherInput").classList.add("hidden");
+        $("editStoreOtherInput").value = "";
+      }
+
+      $("editModalWrap").classList.add("open");
+    }
+
+    async function saveEdit() {
+      const id = $("editItemId").value;
+      if (!id) return;
+
+      const store_id = $("editStoreSelect").value || null;
+      const selectedStore = stores.find(s => s.id === store_id);
+      let store_other = null;
+      if (selectedStore?.name === "Other") {
+        store_other = $("editStoreOtherInput").value.trim() || null;
+      }
+
+      const existing = items.find(i => i.id === id);
+      let image_path = existing?.image_path || null;
+      let image_url = existing?.image_url || null;
+
+      const newPhoto = $("editPhotoInput").files?.[0];
+      if (newPhoto) {
+        try {
+          toast("Uploading replacement photo...");
+          const uploaded = await uploadPhoto(newPhoto);
+          image_path = uploaded.image_path;
+          image_url = uploaded.image_url;
+        } catch (err) {
+          console.error(err);
+          toast("Photo upload failed.");
+          return;
+        }
+      }
+
+      const last_price = $("editPriceInput").value ? Number($("editPriceInput").value) : null;
+
+      const payload = {
+        name: $("editNameInput").value.trim(),
+        category_id: $("editCategorySelect").value || null,
+        store_id,
+        store_other,
+        quantity: $("editQuantityInput").value ? Number($("editQuantityInput").value) : null,
+        unit: $("editUnitInput").value.trim() || null,
+        notes: $("editNotesInput").value.trim() || null,
+        last_price,
+        fallback_store_id: $("editFallbackStoreSelect").value || null,
+        trip_status: $("editTripStatusSelect").value || "pending",
+        price_store_id: store_id,
+        price_updated_at: last_price ? new Date().toISOString() : null,
+        image_path,
+        image_url
+      };
+
+      const { error } = await supabase.from("items").update(payload).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not save changes.");
+        return;
+      }
+
+      if (last_price) {
+        await supabase.from("price_history").insert({
+          item_id: id,
+          store_id,
+          price: last_price,
+          note: "Manual edit entry"
+        });
+      }
+
+      closeEditModal();
+      toast("Item updated.");
+    }
+
+    async function archiveCurrentItem() {
+      const id = $("editItemId").value;
+      if (!id) return;
+      const { error } = await supabase.from("items").update({ archived: true }).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not archive item.");
+        return;
+      }
+      closeEditModal();
+      toast("Item archived.");
+    }
+
+    async function deleteCurrentItem() {
+      const id = $("editItemId").value;
+      if (!id) return;
+      const { error } = await supabase.from("items").delete().eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not delete item.");
+        return;
+      }
+      closeEditModal();
+      toast("Item deleted.");
+    }
+
+    function closeEditModal() {
+      $("editModalWrap").classList.remove("open");
+      $("editPhotoInput").value = "";
+    }
+
+    function openPhoto(url) {
+      $("photoModalImg").src = url;
+      $("photoModalWrap").classList.add("open");
+    }
+
+    function closePhotoModal() {
+      $("photoModalWrap").classList.remove("open");
+      $("photoModalImg").src = "";
+    }
+
+    function renderManagers() {
+      $("categoriesManager").innerHTML = categories
+        .filter(c => c.active)
+        .sort((a,b) => (a.sort_order ?? 999) - (b.sort_order ?? 999) || a.name.localeCompare(b.name))
+        .map(c => `
+          <div class="toolbar" style="margin-top:8px;">
+            <div class="toolbar-group" style="flex:1;">
+              <span class="chip">${escapeHtml(c.icon || "•")} ${escapeHtml(c.name)}</span>
+            </div>
+            <div class="toolbar-group">
+              <button class="icon-btn" onclick="renameCategory('${c.id}', '${escapeHtml(c.name).replaceAll("&#039;","\\'")}')">✏️</button>
+              <button class="icon-btn" onclick="deactivateCategory('${c.id}')">🗑️</button>
+            </div>
+          </div>
+        `).join("");
+
+      $("storesManager").innerHTML = stores
+        .filter(s => s.active)
+        .sort((a,b) => (a.sort_order ?? 999) - (b.sort_order ?? 999) || a.name.localeCompare(b.name))
+        .map(s => `
+          <div class="toolbar" style="margin-top:8px;">
+            <div class="toolbar-group" style="flex:1;">
+              <span class="chip">🛒 ${escapeHtml(s.name)}</span>
+            </div>
+            <div class="toolbar-group">
+              <button class="icon-btn" onclick="renameStore('${s.id}', '${escapeHtml(s.name).replaceAll("&#039;","\\'")}')">✏️</button>
+              <button class="icon-btn" onclick="deactivateStore('${s.id}')">🗑️</button>
+            </div>
+          </div>
+        `).join("");
+    }
+
+    async function renameCategory(id, currentName) {
+      const newName = prompt("Rename category", currentName);
+      if (!newName || !newName.trim()) return;
+      const { error } = await supabase.from("categories").update({ name: newName.trim() }).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not rename category.");
+        return;
+      }
+      toast("Category updated.");
+    }
+
+    async function deactivateCategory(id) {
+      const { error } = await supabase.from("categories").update({ active: false }).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not remove category.");
+        return;
+      }
+      toast("Category removed.");
+    }
+
+    async function renameStore(id, currentName) {
+      const newName = prompt("Rename store", currentName);
+      if (!newName || !newName.trim()) return;
+      const { error } = await supabase.from("stores").update({ name: newName.trim() }).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not rename store.");
+        return;
+      }
+      toast("Store updated.");
+    }
+
+    async function deactivateStore(id) {
+      const { error } = await supabase.from("stores").update({ active: false }).eq("id", id);
+      if (error) {
+        console.error(error);
+        toast("Could not remove store.");
+        return;
+      }
+      toast("Store removed.");
+    }
+
+    async function addCategory() {
+      const name = $("newCategoryInput").value.trim();
+      if (!name) {
+        toast("Type a category name first.");
+        return;
+      }
+      const { error } = await supabase.from("categories").insert({
+        name,
+        icon: "•",
+        is_custom: true,
+        active: true,
+        sort_order: 500
+      });
+      if (error) {
+        console.error(error);
+        toast("Could not add category.");
+        return;
+      }
+      $("newCategoryInput").value = "";
+      toast("Category added.");
+    }
+
+    async function addStore() {
+      const name = $("newStoreInput").value.trim();
+      if (!name) {
+        toast("Type a store name first.");
+        return;
+      }
+      const { error } = await supabase.from("stores").insert({
+        name,
+        is_custom: true,
+        active: true,
+        sort_order: 500
+      });
+      if (error) {
+        console.error(error);
+        toast("Could not add store.");
+        return;
+      }
+      $("newStoreInput").value = "";
+      toast("Store added.");
+    }
+
+    async function saveAppName() {
+      const value = $("appNameInput").value.trim();
+      if (!value) {
+        toast("App name cannot be blank.");
+        return;
+      }
+      if (!appSettings?.id) {
+        const { data, error } = await supabase.from("app_settings").insert({
+          app_name: value,
+          show_completed: $("showCompletedToggle").checked,
+          default_view: currentView
+        }).select().single();
+        if (error) {
+          console.error(error);
+          toast("Could not save app name.");
+          return;
+        }
+        appSettings = data;
+      } else {
+        const { error } = await supabase.from("app_settings").update({
+          app_name: value,
+          show_completed: $("showCompletedToggle").checked,
+          default_view: currentView
+        }).eq("id", appSettings.id);
+        if (error) {
+          console.error(error);
+          toast("Could not save app name.");
+          return;
+        }
+      }
+      $("appTitle").textContent = value;
+      toast("App name saved.");
+    }
+
+    async function persistUISettings() {
+      if (!appSettings?.id) return;
+      await supabase.from("app_settings").update({
+        show_completed: $("showCompletedToggle").checked,
+        default_view: currentView
+      }).eq("id", appSettings.id);
+    }
+
+    async function enableBrowserNotifications() {
+      if (!("Notification" in window)) {
+        toast("This browser does not support notifications.");
+        return;
+      }
+      const result = await Notification.requestPermission();
+      if (result === "granted") toast("Browser alerts enabled.");
+      else toast("Notifications were not enabled.");
+    }
+
+    function bindEvents() {
+      $("addItemBtn").addEventListener("click", addItem);
+      $("resetFormBtn").addEventListener("click", resetForm);
+      $("sendStatusBtn").addEventListener("click", sendStatus);
+      $("clearCompletedBtn").addEventListener("click", clearCompleted);
+
+      $("viewGroupedBtn").addEventListener("click", async () => { setView("grouped"); await persistUISettings(); });
+      $("viewFlatBtn").addEventListener("click", async () => { setView("flat"); await persistUISettings(); });
+      $("viewTripBtn").addEventListener("click", async () => { setView("trip"); await persistUISettings(); });
+
+      $("showCompletedToggle").addEventListener("change", async () => {
+        renderList();
+        await persistUISettings();
+      });
+
+      $("tripModeToggle").addEventListener("change", () => {
+        isTripMode = $("tripModeToggle").checked;
+        if (isTripMode) setView("trip");
+        else setView(appSettings?.default_view || "grouped");
+      });
+
+      $("tripStoreFilter").addEventListener("change", renderList);
+      $("searchInput").addEventListener("input", renderList);
+
+      $("storeSelect").addEventListener("change", () => {
+        const selected = stores.find(s => s.id === $("storeSelect").value);
+        $("storeOtherInput").classList.toggle("hidden", selected?.name !== "Other");
+      });
+
+      $("editStoreSelect").addEventListener("change", () => {
+        const selected = stores.find(s => s.id === $("editStoreSelect").value);
+        $("editStoreOtherInput").classList.toggle("hidden", selected?.name !== "Other");
+      });
+
+      $("closePhotoModalBtn").addEventListener("click", closePhotoModal);
+      $("photoModalWrap").addEventListener("click", (e) => {
+        if (e.target === $("photoModalWrap")) closePhotoModal();
+      });
+
+      $("closeEditModalBtn").addEventListener("click", closeEditModal);
+      $("saveEditBtn").addEventListener("click", saveEdit);
+      $("archiveItemBtn").addEventListener("click", archiveCurrentItem);
+      $("deleteItemBtn").addEventListener("click", deleteCurrentItem);
+      $("editModalWrap").addEventListener("click", (e) => {
+        if (e.target === $("editModalWrap")) closeEditModal();
+      });
+
+      $("openManagersBtn").addEventListener("click", () => $("managersModalWrap").classList.add("open"));
+      $("closeManagersModalBtn").addEventListener("click", () => $("managersModalWrap").classList.remove("open"));
+      $("managersModalWrap").addEventListener("click", (e) => {
+        if (e.target === $("managersModalWrap")) $("managersModalWrap").classList.remove("open");
+      });
+
+      $("saveAppNameBtn").addEventListener("click", saveAppName);
+      $("addCategoryBtn").addEventListener("click", addCategory);
+      $("addStoreBtn").addEventListener("click", addStore);
+
+      $("enableBrowserNotifBtn").addEventListener("click", enableBrowserNotifications);
+      $("modalEnableBrowserNotifBtn").addEventListener("click", enableBrowserNotifications);
+
+      document.querySelectorAll("[data-preset]").forEach(btn => {
+        btn.addEventListener("click", () => {
+          $("statusInput").value = btn.getAttribute("data-preset");
+        });
+      });
+
+      $("itemNameInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") addItem();
+      });
+
+      $("statusInput").addEventListener("keydown", (e) => {
+        if (e.key === "Enter") sendStatus();
+      });
+    }
+
+    function subscribeRealtime() {
+      supabase.channel("our-list-live")
+        .on("postgres_changes", { event: "*", schema: "public", table: "items" }, () => loadItems())
+        .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, () => loadCategories())
+        .on("postgres_changes", { event: "*", schema: "public", table: "stores" }, () => loadStores())
+        .on("postgres_changes", { event: "*", schema: "public", table: "app_settings" }, () => loadSettings())
+        .on("postgres_changes", { event: "*", schema: "public", table: "status_messages" }, async (payload) => {
+          lastStatus = payload.new || null;
+          renderStatus();
+          const message = payload.new?.message || "List update";
+          const sender = payload.new?.sender_name ? `${payload.new.sender_name}: ` : "";
+          if ("Notification" in window && Notification.permission === "granted") {
+            try {
+              new Notification("Our List", { body: `${sender}${message}` });
+            } catch (e) {}
+          }
+        })
+        .subscribe((status) => {
+          if (status === "SUBSCRIBED") {
+            console.log("Realtime connected");
+          }
+        });
+    }
+
+    async function init() {
+      bindEvents();
+      await Promise.all([
+        loadSettings(),
+        loadCategories(),
+        loadStores(),
+        loadItems(),
+        loadLatestStatus()
+      ]);
+
+      // default selects
+      if (categories[0] && !$("categorySelect").value) $("categorySelect").value = categories[0].id;
+      subscribeRealtime();
+    }
+
+    window.toggleCompleted = toggleCompleted;
+    window.openEditModal = openEditModal;
+    window.openPhoto = openPhoto;
+    window.renameCategory = renameCategory;
+    window.deactivateCategory = deactivateCategory;
+    window.renameStore = renameStore;
+    window.deactivateStore = deactivateStore;
+
+    init();
+  </script>
+</body>
+</html>
