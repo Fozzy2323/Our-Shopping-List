@@ -8,7 +8,8 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Our List" />
-  <script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
+  <link rel="icon" href="data:," />
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
   <style>
     :root{
@@ -290,6 +291,17 @@
       font-weight:800;
     }
 
+    .error-banner{
+      margin-top:16px;
+      background:#fff3f5;
+      border:1px solid #ffc7d1;
+      color:#8a2438;
+      border-radius:18px;
+      padding:14px 16px;
+      font-weight:800;
+      box-shadow:var(--shadow);
+    }
+
     .crossed-wrap{
       border-top:1px solid #edf4f8;
       background:#fbfdff;
@@ -518,6 +530,8 @@
       </div>
     </div>
 
+    <div id="errorBanner" class="error-banner" style="display:none;"></div>
+
     <div class="card" id="listCard">
       <div id="listRender"></div>
     </div>
@@ -665,12 +679,13 @@
   </div>
 
   <script>
-    const sb_URL = "https://euxkqxgtgigbjqgowlej.sb.co";
-    const sb_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eGtxeGd0Z2lnYmpxZ293bGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjY2MTYsImV4cCI6MjA5MjA0MjYxNn0.z4WfmJh9hXaahBNHpy8BFBA6plnnNOfFumF72hC9tt8";
+    const SUPABASE_URL = "https://euxkqxgtgigbjqgowlej.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eGtxeGd0Z2lnYmpxZ293bGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjY2MTYsImV4cCI6MjA5MjA0MjYxNn0.z4WfmJh9hXaahBNHpy8BFBA6plnnNOfFumF72hC9tt8";
     const BUCKET = "item-photos";
     const LAST_CATEGORY_KEY = "our-list-last-category-id";
 
-    const sb = window.sb.createClient(sb_URL, sb_ANON_KEY);
+    const supabaseLib = window.supabase || window.supabasejs;
+    const sb = supabaseLib?.createClient ? supabaseLib.createClient(SUPABASE_URL, SUPABASE_ANON_KEY) : null;
 
     let appSettings = null;
     let categories = [];
@@ -679,6 +694,13 @@
     let latestStatus = null;
 
     const $ = (id) => document.getElementById(id);
+
+    function showError(message){
+      const banner = $("errorBanner");
+      if (!banner) return;
+      banner.style.display = "block";
+      banner.textContent = message;
+    }
 
     function money(v){
       return new Intl.NumberFormat("en-AU",{style:"currency",currency:"AUD",maximumFractionDigits:2}).format(Number(v||0));
@@ -966,10 +988,16 @@
         trip_status: "pending"
       };
 
+      if (!sb) {
+        showError("Supabase client failed to load. Refresh the page and check the CDN script tag.");
+        return;
+      }
+
       const { error } = await sb.from("items").insert(payload);
       if (error) {
         console.error(error);
-        alert("Item did not save. Check console and sb policies.");
+        showError(`Item did not save: ${error.message || 'Unknown error'}`);
+        alert("Item did not save. Check console and Supabase policies.");
         return;
       }
 
@@ -1355,6 +1383,11 @@
     }
 
     async function init(){
+      if (!sb) {
+        console.error("Supabase client failed to initialise.");
+        showError("Supabase client failed to initialise. The page cannot talk to the database yet.");
+        return;
+      }
       bindEvents();
       await Promise.all([
         loadAppSettings(),
