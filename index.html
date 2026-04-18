@@ -1003,6 +1003,7 @@
 
       $("newItemInput").value = "";
       setLastCategory(categoryId);
+      await loadItems();
     }
 
     async function toggleCompleted(id, current){
@@ -1015,7 +1016,10 @@
       const { error } = await sb.from("items").update(payload).eq("id", id);
       if (error) {
         console.error(error);
+        showError(`Could not update item: ${error.message || 'Unknown error'}`);
+        return;
       }
+      await loadItems();
     }
 
     async function clearList(){
@@ -1033,8 +1037,11 @@
 
       if (error) {
         console.error(error);
+        showError(`Could not clear list: ${error.message || 'Unknown error'}`);
         alert("Could not clear list.");
+        return;
       }
+      await loadItems();
     }
 
     async function openDetails(id){
@@ -1153,6 +1160,7 @@
       }
 
       setLastCategory(payload.category_id);
+      await loadItems();
       closeDetails();
     }
 
@@ -1173,6 +1181,7 @@
         alert("Could not archive item.");
         return;
       }
+      await loadItems();
       closeDetails();
     }
 
@@ -1185,6 +1194,7 @@
         alert("Could not delete item.");
         return;
       }
+      await loadItems();
       closeDetails();
     }
 
@@ -1220,6 +1230,7 @@
       }
 
       $("chatMessageInput").value = "";
+      await loadLatestStatus();
     }
 
     async function saveAppName(){
