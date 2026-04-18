@@ -8,7 +8,7 @@
   <meta name="apple-mobile-web-app-capable" content="yes" />
   <meta name="apple-mobile-web-app-status-bar-style" content="default" />
   <meta name="apple-mobile-web-app-title" content="Our List" />
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@sb/sb-js@2"></script>
 
   <style>
     :root{
@@ -665,12 +665,12 @@
   </div>
 
   <script>
-    const SUPABASE_URL = "https://euxkqxgtgigbjqgowlej.supabase.co";
-    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eGtxeGd0Z2lnYmpxZ293bGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjY2MTYsImV4cCI6MjA5MjA0MjYxNn0.z4WfmJh9hXaahBNHpy8BFBA6plnnNOfFumF72hC9tt8";
+    const sb_URL = "https://euxkqxgtgigbjqgowlej.sb.co";
+    const sb_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImV1eGtxeGd0Z2lnYmpxZ293bGVqIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY0NjY2MTYsImV4cCI6MjA5MjA0MjYxNn0.z4WfmJh9hXaahBNHpy8BFBA6plnnNOfFumF72hC9tt8";
     const BUCKET = "item-photos";
     const LAST_CATEGORY_KEY = "our-list-last-category-id";
 
-    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    const sb = window.sb.createClient(sb_URL, sb_ANON_KEY);
 
     let appSettings = null;
     let categories = [];
@@ -871,7 +871,7 @@
     }
 
     async function loadAppSettings(){
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("app_settings")
         .select("*")
         .limit(1)
@@ -888,7 +888,7 @@
     }
 
     async function loadCategories(){
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("categories")
         .select("*")
         .order("sort_order",{ascending:true});
@@ -903,7 +903,7 @@
     }
 
     async function loadStores(){
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("stores")
         .select("*")
         .order("sort_order",{ascending:true});
@@ -918,7 +918,7 @@
     }
 
     async function loadItems(){
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("items")
         .select("*")
         .order("created_at",{ascending:true});
@@ -933,7 +933,7 @@
     }
 
     async function loadLatestStatus(){
-      const { data, error } = await supabase
+      const { data, error } = await sb
         .from("status_messages")
         .select("*")
         .order("created_at",{ascending:false})
@@ -966,10 +966,10 @@
         trip_status: "pending"
       };
 
-      const { error } = await supabase.from("items").insert(payload);
+      const { error } = await sb.from("items").insert(payload);
       if (error) {
         console.error(error);
-        alert("Item did not save. Check console and Supabase policies.");
+        alert("Item did not save. Check console and sb policies.");
         return;
       }
 
@@ -984,7 +984,7 @@
         trip_status: next ? "purchased" : "pending"
       };
 
-      const { error } = await supabase.from("items").update(payload).eq("id", id);
+      const { error } = await sb.from("items").update(payload).eq("id", id);
       if (error) {
         console.error(error);
       }
@@ -998,7 +998,7 @@
       }
 
       const ids = crossed.map(i => i.id);
-      const { error } = await supabase
+      const { error } = await sb
         .from("items")
         .update({ archived: true })
         .in("id", ids);
@@ -1050,14 +1050,14 @@
       const ext = (file.name.split(".").pop() || "jpg").toLowerCase();
       const path = `${Date.now()}-${Math.random().toString(36).slice(2)}.${ext}`;
 
-      const { error: uploadError } = await supabase.storage.from(BUCKET).upload(path, file, {
+      const { error: uploadError } = await sb.storage.from(BUCKET).upload(path, file, {
         cacheControl: "3600",
         upsert: false
       });
 
       if (uploadError) throw uploadError;
 
-      const { data } = supabase.storage.from(BUCKET).getPublicUrl(path);
+      const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
       return { image_path: path, image_url: data.publicUrl };
     }
 
@@ -1108,7 +1108,7 @@
         price_updated_at: lastPrice ? new Date().toISOString() : null
       };
 
-      const { error } = await supabase.from("items").update(payload).eq("id", id);
+      const { error } = await sb.from("items").update(payload).eq("id", id);
       if (error) {
         console.error(error);
         alert("Could not save details.");
@@ -1116,7 +1116,7 @@
       }
 
       if (lastPrice) {
-        await supabase.from("price_history").insert({
+        await sb.from("price_history").insert({
           item_id: id,
           store_id: storeId,
           price: lastPrice,
@@ -1139,7 +1139,7 @@
     async function archiveItem(){
       const id = $("editId").value;
       if (!id) return;
-      const { error } = await supabase.from("items").update({ archived: true }).eq("id", id);
+      const { error } = await sb.from("items").update({ archived: true }).eq("id", id);
       if (error) {
         console.error(error);
         alert("Could not archive item.");
@@ -1151,7 +1151,7 @@
     async function deleteItem(){
       const id = $("editId").value;
       if (!id) return;
-      const { error } = await supabase.from("items").delete().eq("id", id);
+      const { error } = await sb.from("items").delete().eq("id", id);
       if (error) {
         console.error(error);
         alert("Could not delete item.");
@@ -1180,7 +1180,7 @@
       const sender = $("chatNameInput").value.trim() || null;
       if (!message) return;
 
-      const { error } = await supabase.from("status_messages").insert({
+      const { error } = await sb.from("status_messages").insert({
         message,
         sender_name: sender
       });
@@ -1199,7 +1199,7 @@
       if (!value) return;
 
       if (!appSettings?.id) {
-        const { data, error } = await supabase.from("app_settings").insert({
+        const { data, error } = await sb.from("app_settings").insert({
           app_name: value
         }).select().single();
 
@@ -1211,7 +1211,7 @@
 
         appSettings = data;
       } else {
-        const { error } = await supabase.from("app_settings").update({
+        const { error } = await sb.from("app_settings").update({
           app_name: value
         }).eq("id", appSettings.id);
 
@@ -1231,7 +1231,7 @@
       const name = $("newCategoryInput").value.trim();
       if (!name) return;
 
-      const { error } = await supabase.from("categories").insert({
+      const { error } = await sb.from("categories").insert({
         name,
         icon: "•",
         active: true,
@@ -1252,7 +1252,7 @@
       const name = $("newStoreInput").value.trim();
       if (!name) return;
 
-      const { error } = await supabase.from("stores").insert({
+      const { error } = await sb.from("stores").insert({
         name,
         active: true,
         is_custom: true,
@@ -1271,24 +1271,24 @@
     async function renameCategory(id, currentName){
       const next = prompt("Rename category", currentName);
       if (!next || !next.trim()) return;
-      const { error } = await supabase.from("categories").update({ name: next.trim() }).eq("id", id);
+      const { error } = await sb.from("categories").update({ name: next.trim() }).eq("id", id);
       if (error) console.error(error);
     }
 
     async function deactivateCategory(id){
-      const { error } = await supabase.from("categories").update({ active: false }).eq("id", id);
+      const { error } = await sb.from("categories").update({ active: false }).eq("id", id);
       if (error) console.error(error);
     }
 
     async function renameStore(id, currentName){
       const next = prompt("Rename store", currentName);
       if (!next || !next.trim()) return;
-      const { error } = await supabase.from("stores").update({ name: next.trim() }).eq("id", id);
+      const { error } = await sb.from("stores").update({ name: next.trim() }).eq("id", id);
       if (error) console.error(error);
     }
 
     async function deactivateStore(id){
-      const { error } = await supabase.from("stores").update({ active: false }).eq("id", id);
+      const { error } = await sb.from("stores").update({ active: false }).eq("id", id);
       if (error) console.error(error);
     }
 
@@ -1342,7 +1342,7 @@
     }
 
     function subscribeRealtime(){
-      supabase.channel("our-list-realtime-clean")
+      sb.channel("our-list-realtime-clean")
         .on("postgres_changes", { event: "*", schema: "public", table: "items" }, () => loadItems())
         .on("postgres_changes", { event: "*", schema: "public", table: "categories" }, () => loadCategories())
         .on("postgres_changes", { event: "*", schema: "public", table: "stores" }, () => loadStores())
